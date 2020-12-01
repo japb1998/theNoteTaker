@@ -8,9 +8,10 @@ const { v4: uuidv4 } = require('uuid')
 app.use(express.urlencoded({
     extended: true
 }))
+//static file and express.json
 app.use(express.json())
 app.use(express.static('public'));
-
+//request handlers
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'))
 })
@@ -30,22 +31,23 @@ app.post('/api/notes', (req, res) => {
             return err
         }
         let arrayOfNotes = JSON.parse(data);
-        // if(typeof arrayOfNotes[0] === 'object'){
-        //   let id = arrayOfNotes[arrayOfNotes.length - 1].id ;
-        //   id++;
-        //   req.body.id = id
-        // } else {
-        //     req.body.id = 1;
-        // }
-        req.body.id = uuidv4();
-        arrayOfNotes.push(req.body);
+  
+        const note = {
+            id:uuidv4(),
+           title: req.body.title,
+           text: req.body.text
+        }
+       
+        arrayOfNotes.push(note);
         console.log(arrayOfNotes)
         fs.writeFileSync(path.join(__dirname, 'db/db.json'), JSON.stringify(arrayOfNotes), (err) => {
+            if(err){ return err}
             console.log(arrayOfNotes);
+            
         })
-
+        res.send('success');
     });
-    res.send('success');
+    
 });
 app.delete('/api/notes/:id',(req,res)=>{
     let deletedItem = req.params.id;
